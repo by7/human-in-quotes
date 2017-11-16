@@ -43,9 +43,9 @@ void setup() {
 
 int prev_error = 0;
 int sum_error = 0;
-int KP = 5;
+int KP = 50;
 int KI = 1;
-int KD = 10;
+int KD = 25;
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -62,12 +62,12 @@ void loop() {
 //  Serial.print(" ");
 //  Serial.println(right);
   
-  int error = right-left;
+  int error = left*2-right;
   int P,I,D;
   P = KP*error;
   I = KI*sum_error;
   D = KD*(error-prev_error);
-  int changespeed = (P)/10;
+  int changespeed = (P+D)/50;
   Serial.println(changespeed);
 
   if(changespeed<-5){ // turn right
@@ -85,6 +85,11 @@ void loop() {
   analogWrite(M120,75+changespeed);
 
   prev_error = error;
+  if(error<-3)
+    error /= 2;
+  if(error>2)
+    error *= 3;
+  
   sum_error += error;
   delay(10);
 }
