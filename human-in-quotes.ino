@@ -12,12 +12,15 @@
 #define ISLEFT -1
 #define ISCENTER 0
 #define ISRIGHT 1
-#define STOP 5
+
+#define NOSTOP 10
+#define LINEONE 11
+#define EMPTYSPACE 12
+#define STOP 13
 
 int rbias, mbias, lbias;
 int sleft, sright, scenter;
-int state;
-int stopv = 0;
+int stopstate = NOSTOP;
 int count = 0;
 
 void setup() {
@@ -57,9 +60,9 @@ void loop() {
   int mid = analogRead(MID_S)-mbias;
   Serial.print(left);
   Serial.print(" ");
-  Serial.print(mid);
+  Serial.print(right);
   Serial.print(" ");
-  Serial.println(right);
+  Serial.println(mid);
 
   sleft = (left<-8);
   sright = (right<-8);
@@ -114,7 +117,25 @@ void loop() {
   if(count%15)
     stopv = 0;
     */
-
+  if(stopstate == NOSTOP){
+    if(sleft && scenter && sright){
+      stopstate = LINEONE;
+    }
+  }else if(stopstate == LINEONE){
+    if(!sleft || !scenter || !sright){
+      stopstate = EMPTYSPACE;
+    }
+  }else if(stopstate == EMPTYSPACE){
+    if(sleft && scenter && sright){
+      stopstate = STOP;
+      digitalWrite(RED, HIGH);
+      digitalWrite(BLU, HIGH);
+      analogWrite(M125,255);
+      analogWrite(M120,0);
+      delay(99999);
+    }
+  }
+  
   if(sleft && !sright){
     //go left
     digitalWrite(BLU, HIGH);
@@ -139,7 +160,7 @@ void loop() {
     analogWrite(M125,177);
     analogWrite(M120,75);
   }
-  delay(10);
+  //delay(10);
 }
 
 void startMotors(){
